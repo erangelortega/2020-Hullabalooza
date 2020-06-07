@@ -18,8 +18,8 @@ data Festival = UnFestival {
     lugar :: String,
     cantidadPersonas :: Int,
     animoInicial :: String,
-    bandas :: [String]
-} deriving (Show, Eq)
+    bandas :: [Banda]
+} deriving (Show)
 
 data Banda = UnaBanda {
     nombre :: String,
@@ -28,10 +28,10 @@ data Banda = UnaBanda {
     decibeles :: Int
 } deriving Show
 
-festivalHullabalooza = UnFestival "Argentina" 20000 "indiferente" ["Miranda", "Los Redondos", "Metallica", "Soda"]
+festivalHullabalooza = UnFestival "Argentina" 20000 "indiferente" [miranda, losRedondos, metallica, soda]
 
 
-{-Los Generos-}
+{-LOS GENEROS-}
 type Genero = Festival -> Festival
 
 
@@ -69,3 +69,47 @@ heavyMetal = metal "pesado"
 
 trashMetal :: Genero
 trashMetal = metal "basura"
+
+
+-- LAS BANDAS --
+{-Las bandas tienen un conjunto de descripciones realizadas por los críticos y los decibeles a los que suelen tocar. Además, cada vez que tocan,
+ las bandas movilizan al público del festival de acuerdo al género al que pertenezcan.-}
+    
+    -- Los redondos, que está descripta como “legendaria” y “pogosa”, toca a 45 decibeles y se considera de rock nacional. 
+losRedondos = UnaBanda {
+    nombre = "LosRedondos", 
+    descripcion = ["legendaria", "pogojosa"], 
+    decibeles = 45, 
+    genero = rockNacional
+    }
+
+    -- Soda está descripta como "irrepetible", toca a 40 decibeles y también es de rock nacional.
+soda = UnaBanda {
+    nombre = "Soda", 
+    descripcion = ["irrepetible"], 
+    decibeles = 40, 
+    genero = rockNacional
+    }
+    
+    -- Miranda es una banda de pop que toca a 60 decibeles y los críticos la describieron como "insípida", "incolora" e "inodora".
+miranda = UnaBanda {
+    nombre = "Miranda", 
+    descripcion = ["insipida", "incolora", "inodora"], 
+    decibeles = 60, 
+    genero = pop
+    }
+
+    -- Metallica está descripta como “legendaria” y “vendida” y toca a 60 decibeles. Es una de las mayores exponentes del heavy metal.
+metallica = UnaBanda {
+    nombre = "Metallica", 
+    descripcion = ["legendaria", "vendida"], 
+    decibeles = 60, 
+    genero = heavyMetal
+    }
+
+-- PUNTO 1 --
+{-Modelar el festival, las bandas y los géneros de manera de poder definir la función tocar, que hace que 
+ la banda toque y altere al público del festival de acuerdo a su género. (Definir también esa función) -}
+
+tocar :: Banda -> Festival -> Festival
+tocar banda = genero banda
