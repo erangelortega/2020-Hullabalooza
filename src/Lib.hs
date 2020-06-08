@@ -82,7 +82,8 @@ tocar banda = genero banda
 {-Representar las bandas, géneros y el festival dados como ejemplo. Agregar una banda que sea trash metal.-}
 
     -- FESTIVAL
-festivalHullabalooza = UnFestival "Argentina" 20000 "indiferente" [miranda, losRedondos, metallica, soda]
+festivalHullabalooza = UnFestival "Argentina" 20000 "indiferente" [miranda, losRedondos, metallica, soda] {-sin ordenar las bandas coronologicamente-}
+
 
     -- LAS BANDAS --
     {-Las bandas tienen un conjunto de descripciones realizadas por los críticos y los decibeles a los que suelen tocar. Además, cada vez que tocan,
@@ -158,26 +159,63 @@ suceder' festival = (last . foldl (festivalesSucesivos) [festival]) (bandas fest
     Definir las funciones que permitan clasificar a las bandas. Una banda puede clasificarse de más de una manera a la vez o ninguna.
     -}
 
-type CriterioDeClasificacion = Banda -> Bool
-criterios = [vendida, acustica, legendaria]
+type Clasificacion = Banda -> Bool
+criteriosEjemplo = [vendida, acustica, legendaria]
 
-clasificarUnaBanda :: Banda -> [CriterioDeClasificacion]
-clasificarUnaBanda banda = filter (verificarCriterio banda)  criterios
+clasificarUnaBanda :: Banda -> [Clasificacion] -> [Clasificacion]
+clasificarUnaBanda banda = filter (verificarCriterio banda)
 
-verificarCriterio :: Banda -> CriterioDeClasificacion -> Bool
+verificarCriterio :: Banda -> Clasificacion -> Bool
 verificarCriterio banda criterio = criterio banda
 
+
     -- desarrollo de criterios de clasificacion 
-vendida :: CriterioDeClasificacion
+vendida :: Clasificacion
 vendida banda = ((> 2) . length . descripcion) banda || (elem "vendida". descripcion ) banda
 
-acustica :: CriterioDeClasificacion
+acustica :: Clasificacion
 acustica = (> 55) . decibeles 
 
-legendaria :: CriterioDeClasificacion
+legendaria :: Clasificacion
 legendaria banda = (elem "legendaria" . descripcion) banda && ((> 40) . decibeles) banda
 
 
+-- PUNTO 6 --
+{-Definir la función popularidad, que, dada una lista de clasificaciones, permite conocer la popularidad de una banda. 
+La popularidad se calcula así: 100 puntos por cada clasificación a la que la banda aplique.-}
+
+popularidad :: Banda -> [Clasificacion] -> Int
+popularidad banda = (*100) . length . clasificarUnaBanda banda
 
 
+-- PUNTO 7 --
+{-Definir la función buenFest, que dado un festival y un conjunto de clasificaciones posibles dice si es un buen fest. 
+ Esto sucede cuando cronológicamente cada banda es más popular que la anterior, y además la popularidad total (la popularidad acumulada de sus bandas) supera los 1000 puntos.-}
 
+hullabalooza criterios = ordenarBandas criterios festivalHullabalooza
+
+ordenarBandas :: [Clasificacion] -> Festival -> Festival
+ordenarBandas criterios festival = festival {bandas = ordenarSegun (mayor f) . bandas $ festival}
+    where f = flip popularidad criterios
+
+mayor :: Ord b => (a -> b) -> a -> a -> Bool
+mayor funcion numr1 numr2 = funcion numr1 > funcion numr2 
+
+ordenarSegun :: (a -> a -> Bool) -> [a] -> [a]
+ordenarSegun _ [] = []
+ordenarSegun criterio (x:xs) =
+  (ordenarSegun criterio . filter (not . criterio x)) xs ++ 
+  [x] ++ 
+  (ordenarSegun criterio . filter (criterio x)) xs
+
+
+buenFest :: Festival -> [Clasificacion] -> Bool
+buenFest festival criterios = (popularidadCronologica criterios .bandas $ festival) && (popularidadAcumulada criterios. bandas $ festival)
+
+popularidadCronologica :: [Clasificacion] -> [Banda] -> Bool
+popularidadCronologica _ [] = True
+popularidadCronologica _ [banda] = True
+popularidadCronologica criterios (x:y:xs) = (popularidad x criterios > popularidad y criterios) && popularidadCronologica criterios (y:xs)
+
+popularidadAcumulada :: [Clasificacion] -> [Banda] -> Bool
+popularidadAcumulada criterios = (> 1000). sum . map (flip popularidad criterios)
