@@ -147,7 +147,7 @@ suceder :: Festival -> Festival
 suceder festival = foldl (flip tocar) festival (bandas festival)
 
 suceder' :: Festival -> Festival
-suceder' festival = (last . foldl (festivalesSucesivos) [festival]) (bandas festival)
+suceder' festival = (last . foldl festivalesSucesivos [festival]) (bandas festival)
     where festivalesSucesivos = (\festivalGenerado banda -> festivalGenerado ++ [tocar banda (last festivalGenerado)])
 
 
@@ -214,7 +214,7 @@ buenFest festival criterios = (popularidadCronologica criterios .bandas $ festiv
 
 popularidadCronologica :: [Clasificacion] -> [Banda] -> Bool
 popularidadCronologica _ [] = True
-popularidadCronologica _ [banda] = True
+popularidadCronologica _ [x] = True
 popularidadCronologica criterios (x:y:xs) = (popularidad x criterios > popularidad y criterios) && popularidadCronologica criterios (y:xs)
 
 popularidadAcumulada :: [Clasificacion] -> [Banda] -> Bool
